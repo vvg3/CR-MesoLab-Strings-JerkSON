@@ -14,7 +14,7 @@ public class ItemParser {
     int exceptionCount = 0;
     private HashMap<String, ArrayList<Item>> groceries;
 
-    public ItemParser () {
+    public ItemParser() {
         groceries = new HashMap<String, ArrayList<Item>>();
     }
 
@@ -31,9 +31,9 @@ public class ItemParser {
 
         for (Map.Entry<String, ArrayList<Item>> entry : groceries.entrySet()) {
             display.append("\nname:");
-            display.append(String.format("%9s", entry.getKey().substring(0,1).toUpperCase() + entry.getKey().substring(1)));
+            display.append(String.format("%9s", entry.getKey().substring(0, 1).toUpperCase() + entry.getKey().substring(1)));
             display.append("          seen:  " + entry.getValue().size() + "  times\n");
-            display.append("==============" + "          " + "===============\n");
+            display.append("==============" + "\t\t\t" + "===============\n");
 
             ArrayList<Double> temp = getUniquePrices(entry);
 
@@ -41,7 +41,7 @@ public class ItemParser {
                 display.append("Price:");
                 display.append(String.format("%8s", temp.get(i)));
                 display.append("          seen:  " + countPriceOccurences(entry.getValue(), temp.get(i)) + "  times\n");
-                display.append("--------------" + "          " + "---------------\n");
+                display.append("--------------" + "\t\t\t" + "---------------\n");
             }
         }
 
