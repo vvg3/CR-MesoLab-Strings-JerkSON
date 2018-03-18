@@ -100,12 +100,32 @@ public class ItemParserTest {
     }
 
     @Test
-    public void testDisplay() {
-        ArrayList<String> items = itemParser.parseRawDataIntoStringArray(rawMultipleItemsMore);
-        itemParser.addGroceriesToList(items);
-        System.out.println(itemParser.printGroceries());
-
-
+    public void parseTest1() {
+        String expected = "\nname:    Bread          seen:  3  times\n" +
+                "==============\t\t\t===============\n" +
+                "Price:    1.23          seen:  2  times\n" +
+                "--------------\t\t\t---------------\n" +
+                "Price:     1.5          seen:  1  times\n" +
+                "--------------\t\t\t---------------\n" +
+                "\n" +
+                "name:     Milk          seen:  3  times\n" +
+                "==============\t\t\t===============\n" +
+                "Price:    2.75          seen:  2  times\n" +
+                "--------------\t\t\t---------------\n" +
+                "Price:     1.5          seen:  1  times\n" +
+                "--------------\t\t\t---------------\n" +
+                "\n" +
+                "name:  Cookies          seen:  2  times\n" +
+                "==============\t\t\t===============\n" +
+                "Price:    1.23          seen:  1  times\n" +
+                "--------------\t\t\t---------------\n" +
+                "Price:    1.75          seen:  1  times\n" +
+                "--------------\t\t\t---------------\n" +
+                "\n" +
+                "\n" +
+                "1  errors\n";
+        String actual = itemParser.parse(rawMultipleItemsMore);
+        Assert.assertEquals(expected, actual);
     }
 
 }

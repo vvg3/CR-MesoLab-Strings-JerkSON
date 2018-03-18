@@ -11,68 +11,26 @@ public class ItemParser {
 
     private Pattern pattern;
     private Matcher matcher;
-    int exceptionCount = 0;
+    private int exceptionCount = 0;
     private HashMap<String, ArrayList<Item>> groceries;
 
     public ItemParser() {
         groceries = new HashMap<String, ArrayList<Item>>();
     }
 
-    public void parse(String aString) {
+    public String parse(String aString) {
         ArrayList<String> groceries = parseRawDataIntoStringArray(aString);
         addGroceriesToList(groceries);
-        printGroceries();
-        System.out.println(printGroceries());
+        return printGroceries();
     }
 
-    public String printGroceries() {
-
-        StringBuilder display = new StringBuilder();
-
-        for (Map.Entry<String, ArrayList<Item>> entry : groceries.entrySet()) {
-            display.append("\nname:");
-            display.append(String.format("%9s", entry.getKey().substring(0, 1).toUpperCase() + entry.getKey().substring(1)));
-            display.append("          seen:  " + entry.getValue().size() + "  times\n");
-            display.append("==============" + "\t\t\t" + "===============\n");
-
-            ArrayList<Double> temp = getUniquePrices(entry);
-
-            for (int i = 0; i < temp.size(); i++) {
-                display.append("Price:");
-                display.append(String.format("%8s", temp.get(i)));
-                display.append("          seen:  " + countPriceOccurences(entry.getValue(), temp.get(i)) + "  times\n");
-                display.append("--------------" + "\t\t\t" + "---------------\n");
-            }
-        }
-
-        display.append("\n\n" + exceptionCount + "  errors\n");
-
-        return display.toString();
+    protected ArrayList<String> parseRawDataIntoStringArray(String rawData) {
+        String stringPattern = "##";
+        ArrayList<String> response = splitStringWithRegexPattern(stringPattern, rawData);
+        return response;
     }
 
-    public ArrayList<Double> getUniquePrices(Map.Entry<String, ArrayList<Item>> entry) {
-        ArrayList<Double> prices = new ArrayList<Double>();
-
-        for (int i = 0; i < entry.getValue().size(); i++) {
-            if (!prices.contains(entry.getValue().get(i).getPrice())) {
-                prices.add(entry.getValue().get(i).getPrice());
-            }
-        }
-        return prices;
-    }
-
-    public int countPriceOccurences(ArrayList<Item> aList, Double aPrice) {
-        int count = 0;
-
-        for (int i = 0; i < aList.size(); i++) {
-            if (aList.get(i).getPrice().equals(aPrice)) {
-                count++;
-            }
-        }
-        return count;
-    }
-
-    public void addGroceriesToList(ArrayList<String> jerkList) {
+    protected void addGroceriesToList(ArrayList<String> jerkList) {
         for (int i = 0; i < jerkList.size(); i++) {
             try {
                 Item temp = (parseStringIntoItem(jerkList.get(i)));
@@ -83,22 +41,7 @@ public class ItemParser {
         }
     }
 
-    private void incrementItem(Map<String, ArrayList<Item>> aMap, Item anItem) {
-        if (aMap.keySet().contains(anItem.getName())) {
-            aMap.get(anItem.getName()).add(anItem);
-        } else {
-            aMap.put(anItem.getName(), new ArrayList<Item>());
-            aMap.get(anItem.getName()).add(anItem);
-        }
-    }
-
-    public ArrayList<String> parseRawDataIntoStringArray(String rawData) {
-        String stringPattern = "##";
-        ArrayList<String> response = splitStringWithRegexPattern(stringPattern, rawData);
-        return response;
-    }
-
-    public Item parseStringIntoItem(String rawItem) throws ItemParseException {
+    protected Item parseStringIntoItem(String rawItem) throws ItemParseException {
         String aName = findName(rawItem);
         Double aPrice = findPrice(rawItem);
         String aType = findType(rawItem);
@@ -109,6 +52,78 @@ public class ItemParser {
         }
 
         return new Item(aName, aPrice, aType, anExpiration);
+    }
+
+    protected ArrayList<String> findKeyValuePairsInRawItemData(String rawItem) {
+        String stringPattern = "[;|^]";
+        return splitStringWithRegexPattern(stringPattern, rawItem);
+    }
+
+    public HashMap<String, ArrayList<Item>> getGroceries() {
+        return groceries;
+    }
+
+
+    // private methods
+
+    private ArrayList<String> splitStringWithRegexPattern(String stringPattern, String inputString) {
+        return new ArrayList<String>(Arrays.asList(inputString.split(stringPattern)));
+    }
+
+    private String printGroceries() {
+        StringBuilder display = new StringBuilder();
+        for (Map.Entry<String, ArrayList<Item>> entry : groceries.entrySet()) {
+            displayItemInfo(display, entry);
+            displayPriceInfo(display, entry);
+        }
+        display.append("\n\n").append(exceptionCount).append("  errors\n");
+        return display.toString();
+    }
+
+    private void displayItemInfo(StringBuilder aBuilder, Map.Entry<String, ArrayList<Item>> anEntry) {
+        aBuilder.append("\nname:");
+        aBuilder.append(String.format("%9s", anEntry.getKey().substring(0, 1).toUpperCase() + anEntry.getKey().substring(1)));
+        aBuilder.append("          seen:  " + anEntry.getValue().size() + "  times\n");
+        aBuilder.append("==============" + "\t\t\t" + "===============\n");
+    }
+
+    private void displayPriceInfo(StringBuilder aBuilder, Map.Entry<String, ArrayList<Item>> anEntry) {
+        ArrayList<Double> uniquePriceArrayList = getUniquePrices(anEntry);
+        for (Double aPrice : uniquePriceArrayList) {
+            aBuilder.append("Price:").append(String.format("%8s", aPrice));
+            aBuilder.append("          seen:  " + priceOccurences(anEntry.getValue(), aPrice) + "  times\n");
+            aBuilder.append("--------------" + "\t\t\t" + "---------------\n");
+        }
+    }
+
+    private ArrayList<Double> getUniquePrices(Map.Entry<String, ArrayList<Item>> entry) {
+        ArrayList<Double> prices = new ArrayList<Double>();
+
+        for (int i = 0; i < entry.getValue().size(); i++) {
+            if (!prices.contains(entry.getValue().get(i).getPrice())) {
+                prices.add(entry.getValue().get(i).getPrice());
+            }
+        }
+        return prices;
+    }
+
+    private int priceOccurences(ArrayList<Item> aList, Double aPrice) {
+        int count = 0;
+        for (Item anAList : aList) {
+            if (anAList.getPrice().equals(aPrice)) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    private void incrementItem(Map<String, ArrayList<Item>> aMap, Item anItem) {
+        if (aMap.keySet().contains(anItem.getName())) {
+            aMap.get(anItem.getName()).add(anItem);
+        } else {
+            aMap.put(anItem.getName(), new ArrayList<Item>());
+            aMap.get(anItem.getName()).add(anItem);
+        }
     }
 
     private String findName(String aString) {
@@ -179,17 +194,4 @@ public class ItemParser {
         }
     }
 
-    public ArrayList<String> findKeyValuePairsInRawItemData(String rawItem) {
-        String stringPattern = "[;|^]";
-        ArrayList<String> response = splitStringWithRegexPattern(stringPattern, rawItem);
-        return response;
-    }
-
-    private ArrayList<String> splitStringWithRegexPattern(String stringPattern, String inputString) {
-        return new ArrayList<String>(Arrays.asList(inputString.split(stringPattern)));
-    }
-
-    public HashMap<String, ArrayList<Item>> getGroceries() {
-        return groceries;
-    }
 }

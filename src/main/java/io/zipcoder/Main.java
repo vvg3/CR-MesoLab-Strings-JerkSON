@@ -15,10 +15,7 @@ public class Main {
 
     public static void main(String[] args) throws Exception{
         String output = (new Main()).readRawDataToString();
-        parser.parse(output);
-
-
-//        System.out.println(output);
         // TODO: parse the data in output into items, and display to console.
+        System.out.println(parser.parse(output));
     }
 }
